@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HEX CASINO — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#020810;--bg2:#050f1a;--bg3:#071220;--neon:#00ff88;--neon2:#00ccff;--neon3:#ff0066;--neon4:#ffaa00;--text:#c8e8ff;--text-dim:#4a7a9b;--border:#0d2a3d;}
+html,body{background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;min-height:100vh;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.1) 2px,rgba(0,0,0,0.1) 4px);pointer-events:none;z-index:999;}
+
+/* NAV */
+nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;background:linear-gradient(135deg,var(--neon),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.15em;}
+.nav-balance{display:flex;align-items:center;gap:0.75rem;font-size:0.8rem;}
+.balance-val{font-family:'Orbitron',sans-serif;color:var(--neon);font-size:0.95rem;font-weight:700;}
+.nav-user{color:var(--text-dim);font-size:0.75rem;}
+.logout-btn{background:transparent;border:1px solid var(--neon3);color:var(--neon3);font-family:'Share Tech Mono',monospace;font-size:0.7rem;padding:0.35rem 0.75rem;cursor:pointer;letter-spacing:0.1em;transition:all 0.2s;}
+.logout-btn:hover{background:var(--neon3);color:#000;}
+
+/* LAYOUT */
+.main{max-width:1200px;margin:0 auto;padding:1.5rem;}
+
+/* GAME GRID */
+.section-title{font-family:'Orbitron',sans-serif;font-size:0.7rem;letter-spacing:0.2em;color:var(--text-dim);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
+.games-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin-bottom:2rem;}
+.game-card{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:1.5rem;cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden;}
+.game-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--neon);transform:scaleX(0);transition:transform 0.3s;transform-origin:left;}
+.game-card:hover{border-color:var(--neon);box-shadow:0 0 20px rgba(0,255,136,0.1);transform:translateY(-2px);}
+.game-card:hover::before{transform:scaleX(1);}
+.game-card.active-game{border-color:var(--neon);box-shadow:0 0 20px rgba(0,255,136,0.15);}
+.game-card.active-game::before{transform:scaleX(1);}
+.game-icon{font-size:2rem;margin-bottom:0.75rem;}
+.game-name{font-family:'Orbitron',sans-serif;font-size:0.85rem;font-weight:700;color:var(--neon);letter-spacing:0.1em;margin-bottom:0.35rem;}
+.game-desc{font-size:0.72rem;color:var(--text-dim);line-height:1.5;}
+.game-tag{position:absolute;top:0.75rem;right:0.75rem;font-size:0.6rem;letter-spacing:0.1em;color:var(--neon2);border:1px solid var(--neon2);padding:0.15rem 0.4rem;}
+
+/* GAME PANELS */
+.game-panel{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:1.5rem;margin-bottom:2rem;display:none;position:relative;}
+.game-panel.visible{display:block;}
+.game-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--neon),var(--neon2));}
+.panel-title{font-family:'Orbitron',sans-serif;font-size:0.9rem;color:var(--neon);letter-spacing:0.15em;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;}
+.panel-title::before{content:'//';color:var(--text-dim);}
+
+/* BET INPUT */
+.bet-row{display:flex;gap:0.75rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1.25rem;}
+.input-group{display:flex;flex-direction:column;gap:0.4rem;}
+.input-group label{font-size:0.65rem;letter-spacing:0.15em;color:var(--text-dim);text-transform:uppercase;}
+.bet-input{background:rgba(0,255,136,0.03);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.95rem;padding:0.6rem 1rem;border-radius:2px;outline:none;width:140px;transition:all 0.2s;}
+.bet-input:focus{border-color:var(--neon);}
+.select-input{background:var(--bg2);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.85rem;padding:0.6rem 1rem;border-radius:2px;outline:none;cursor:pointer;}
+.action-btn{padding:0.65rem 1.5rem;font-family:'Orbitron',sans-serif;font-size:0.72rem;letter-spacing:0.1em;font-weight:700;border:none;cursor:pointer;border-radius:2px;transition:all 0.3s;text-transform:uppercase;}
+.btn-neon{background:linear-gradient(135deg,var(--neon),var(--neon2));color:#000;}
+.btn-neon:hover{box-shadow:0 0 20px rgba(0,255,136,0.4);transform:translateY(-1px);}
+.btn-cyan{background:transparent;border:1px solid var(--neon2);color:var(--neon2);}
+.btn-cyan:hover{background:var(--neon2);color:#000;}
+.btn-red{background:transparent;border:1px solid var(--neon3);color:var(--neon3);}
+.btn-red:hover{background:var(--neon3);color:#000;}
+.btn-gold{background:linear-gradient(135deg,var(--neon4),#ff6600);color:#000;}
+.btn-gold:hover{box-shadow:0 0 20px rgba(255,170,0,0.4);}
+
+/* RESULT */
+.result-box{margin-top:1rem;padding:1rem;border:1px solid var(--border);border-radius:2px;font-size:0.85rem;line-height:1.8;min-height:60px;background:rgba(0,0,0,0.3);}
+.result-win{border-color:var(--neon);color:var(--neon);}
+.result-lose{border-color:var(--neon3);color:var(--neon3);}
+.result-push{border-color:var(--neon4);color:var(--neon4);}
+
+/* SLOTS */
+.reels{display:flex;gap:0.75rem;margin:1.5rem 0;justify-content:center;}
+.reel{width:80px;height:80px;background:var(--bg2);border:2px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;transition:all 0.3s;position:relative;overflow:hidden;}
+.reel.spinning{animation:spin 0.15s linear infinite;}
+@keyframes spin{0%{transform:translateY(-5px);}50%{transform:translateY(5px);}100%{transform:translateY(-5px);}}
+.reel.win{border-color:var(--neon);box-shadow:0 0 15px rgba(0,255,136,0.4);}
+
+/* BLACKJACK */
+.bj-table{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin:1rem 0;}
+.hand-label{font-size:0.65rem;letter-spacing:0.15em;color:var(--text-dim);margin-bottom:0.5rem;text-transform:uppercase;}
+.cards{display:flex;gap:0.5rem;flex-wrap:wrap;min-height:80px;align-items:center;}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:0.5rem 0.75rem;font-size:1.1rem;font-family:'Orbitron',sans-serif;font-weight:700;min-width:50px;text-align:center;transition:all 0.3s;}
+.card.red{color:#ff4466;}
+.card.black{color:var(--text);}
+.card.face-down{background:linear-gradient(135deg,var(--bg3),var(--border));color:var(--text-dim);}
+.hand-value{font-size:0.75rem;color:var(--text-dim);margin-top:0.4rem;}
+.bj-actions{display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem;}
+
+/* MINES */
+.mines-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.4rem;margin:1.25rem 0;max-width:320px;}
+.mine-cell{aspect-ratio:1;background:var(--bg2);border:1px solid var(--border);border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;transition:all 0.2s;}
+.mine-cell:hover:not(.revealed):not(.mine-hit){background:rgba(0,255,136,0.08);border-color:var(--neon);}
+.mine-cell.safe{background:rgba(0,255,136,0.1);border-color:var(--neon);color:var(--neon);}
+.mine-cell.mine-hit{background:rgba(255,0,102,0.2);border-color:var(--neon3);}
+.mine-cell.mine-reveal{background:rgba(255,0,102,0.1);border-color:var(--border);}
+.mines-info{display:flex;gap:1.5rem;font-size:0.8rem;margin-bottom:1rem;flex-wrap:wrap;}
+.mines-info span{color:var(--neon);}
+.mines-actions{display:flex;gap:0.75rem;flex-wrap:wrap;}
+
+/* POKER */
+.poker-hand{display:flex;gap:0.5rem;flex-wrap:wrap;margin:1rem 0;align-items:center;}
+.poker-card{background:var(--bg2);border:2px solid var(--border);border-radius:6px;padding:0.75rem;font-size:1.2rem;font-family:'Orbitron',sans-serif;font-weight:700;min-width:60px;text-align:center;cursor:pointer;transition:all 0.2s;user-select:none;position:relative;}
+.poker-card.selected{border-color:var(--neon3);background:rgba(255,0,102,0.1);transform:translateY(-8px);}
+.poker-card.selected::after{content:'DISCARD';position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:0.45rem;color:var(--neon3);white-space:nowrap;letter-spacing:0.05em;}
+.poker-card .suit-red{color:#ff4466;}
+.poker-card .suit-black{color:var(--text);}
+.poker-hint{font-size:0.7rem;color:var(--text-dim);margin-bottom:0.5rem;}
+.poker-hand-name{font-family:'Orbitron',sans-serif;font-size:0.9rem;color:var(--neon4);letter-spacing:0.1em;margin:0.5rem 0;}
+
+/* BOTTOM PANELS */
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2rem;}
+.panel{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:1.25rem;}
+.panel-header{font-family:'Orbitron',sans-serif;font-size:0.65rem;letter-spacing:0.2em;color:var(--text-dim);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);}
+.history-item{display:grid;grid-template-columns:70px 1fr auto;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid rgba(13,42,61,0.5);font-size:0.72rem;align-items:center;}
+.history-item:last-child{border-bottom:none;}
+.h-game{color:var(--neon2);}
+.h-detail{color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.h-result{text-align:right;font-weight:700;}
+.h-win{color:var(--neon);}
+.h-lose{color:var(--neon3);}
+.h-push{color:var(--neon4);}
+.lb-item{display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid rgba(13,42,61,0.5);font-size:0.78rem;}
+.lb-item:last-child{border-bottom:none;}
+.lb-rank{font-family:'Orbitron',sans-serif;color:var(--text-dim);width:1.5rem;font-size:0.7rem;}
+.lb-rank.top{color:var(--neon4);}
+.lb-name{flex:1;color:var(--text);}
+.lb-bal{color:var(--neon);font-family:'Orbitron',sans-serif;font-size:0.8rem;}
+
+@media(max-width:600px){
+  .bj-table{grid-template-columns:1fr;}
+  .bottom-grid{grid-template-columns:1fr;}
+  nav{padding:0.75rem 1rem;}
+  .nav-user{display:none;}
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-logo">HEX CASINO</div>
+  <div class="nav-balance">
+    <div class="nav-user" id="nav-user"></div>
+    <div style="font-size:0.7rem;color:var(--text-dim)">BALANCE:</div>
+    <div class="balance-val" id="nav-balance">—</div>
+    <button class="logout-btn" onclick="window.location.href='/logout'">LOGOUT</button>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="section-title">// SELECT GAME</div>
+  <div class="games-grid">
+    <div class="game-card" onclick="openGame('slots')">
+      <div class="game-tag">RNG</div>
+      <div class="game-icon">🎰</div>
+      <div class="game-name">SLOTS</div>
+      <div class="game-desc">Match 3 symbols for massive multipliers. Jackpot pays 10x.</div>
+    </div>
+    <div class="game-card" onclick="openGame('blackjack')">
+      <div class="game-tag">SKILL</div>
+      <div class="game-icon">🃏</div>
+      <div class="game-name">BLACKJACK</div>
+      <div class="game-desc">Beat the dealer. Hit, stand, or bust. Classic 21.</div>
+    </div>
+    <div class="game-card" onclick="openGame('mines')">
+      <div class="game-tag">RISK</div>
+      <div class="game-icon">💣</div>
+      <div class="game-name">MINES</div>
+      <div class="game-desc">Reveal safe cells, multiply winnings. Hit a mine, lose it all.</div>
+    </div>
+    <div class="game-card" onclick="openGame('poker')">
+      <div class="game-tag">STRATEGY</div>
+      <div class="game-icon">♠️</div>
+      <div class="game-name">VIDEO POKER</div>
+      <div class="game-desc">5 card draw. Royal Flush pays 800x. Select cards to hold.</div>
+    </div>
+  </div>
+
+  <!-- SLOTS PANEL -->
+  <div class="game-panel" id="panel-slots">
+    <div class="panel-title">SLOTS</div>
+    <div class="bet-row">
+      <div class="input-group"><label>Bet Amount</label><input class="bet-input" type="number" id="slots-bet" value="50" min="1"/></div>
+      <button class="action-btn btn-neon" onclick="spinSlots()">SPIN</button>
+    </div>
+    <div class="reels">
+      <div class="reel" id="r0">🎰</div>
+      <div class="reel" id="r1">🎰</div>
+      <div class="reel" id="r2">🎰</div>
+    </div>
+    <div class="result-box" id="slots-result">// Place your bet and spin the reels</div>
+  </div>
+
+  <!-- BLACKJACK PANEL -->
+  <div class="game-panel" id="panel-blackjack">
+    <div class="panel-title">BLACKJACK</div>
+    <div class="bet-row" id="bj-bet-row">
+      <div class="input-group"><label>Bet Amount</label><input class="bet-input" type="number" id="bj-bet" value="100" min="1"/></div>
+      <button class="action-btn btn-neon" onclick="bjDeal()">DEAL</button>
+    </div>
+    <div class="bj-table">
+      <div>
+        <div class="hand-label">DEALER</div>
+        <div class="cards" id="dealer-cards"></div>
+        <div class="hand-value" id="dealer-value"></div>
+      </div>
+      <div>
+        <div class="hand-label">PLAYER</div>
+        <div class="cards" id="player-cards"></div>
+        <div class="hand-value" id="player-value"></div>
+      </div>
+    </div>
+    <div class="bj-actions" id="bj-actions" style="display:none">
+      <button class="action-btn btn-neon" onclick="bjHit()">HIT</button>
+      <button class="action-btn btn-cyan" onclick="bjStand()">STAND</button>
+    </div>
+    <div class="result-box" id="bj-result">// Place your bet and deal the cards</div>
+  </div>
+
+  <!-- MINES PANEL -->
+  <div class="game-panel" id="panel-mines">
+    <div class="panel-title">MINES</div>
+    <div class="bet-row" id="mines-bet-row">
+      <div class="input-group"><label>Bet Amount</label><input class="bet-input" type="number" id="mines-bet" value="75" min="1"/></div>
+      <div class="input-group">
+        <label>Mine Count</label>
+        <select class="select-input" id="mines-count">
+          <option value="1">1 Mine</option>
+          <option value="3" selected>3 Mines</option>
+          <option value="5">5 Mines</option>
+          <option value="10">10 Mines</option>
+          <option value="15">15 Mines</option>
+        </select>
+      </div>
+      <button class="action-btn btn-neon" onclick="startMines()">START GAME</button>
+    </div>
+    <div class="mines-info" id="mines-info" style="display:none">
+      <div>Safe cells: <span id="mines-safe">0</span></div>
+      <div>Multiplier: <span id="mines-mult">1.00x</span></div>
+      <div>Potential: <span id="mines-potential">0</span> HEX</div>
+    </div>
+    <div class="mines-grid" id="mines-grid"></div>
+    <div class="mines-actions" id="mines-cashout-row" style="display:none">
+      <button class="action-btn btn-gold" onclick="minesCashout()">CASHOUT</button>
+    </div>
+    <div class="result-box" id="mines-result">// Set mines count, place bet, and start</div>
+  </div>
+
+  <!-- POKER PANEL -->
+  <div class="game-panel" id="panel-poker">
+    <div class="panel-title">VIDEO POKER</div>
+    <div class="bet-row" id="poker-bet-row">
+      <div class="input-group"><label>Bet Amount</label><input class="bet-input" type="number" id="poker-bet" value="100" min="1"/></div>
+      <button class="action-btn btn-neon" id="poker-deal-btn" onclick="pokerDeal()">DEAL HAND</button>
+    </div>
+    <div class="poker-hint" id="poker-hint">Click cards to select them for discard, then draw</div>
+    <div class="poker-hand" id="poker-hand"></div>
+    <div class="poker-hand-name" id="poker-hand-name"></div>
+    <div id="poker-draw-row" style="display:none">
+      <button class="action-btn btn-cyan" onclick="pokerDraw()">DRAW CARDS</button>
+    </div>
+    <div class="result-box" id="poker-result">// Place your bet and deal a hand</div>
+  </div>
+
+  <!-- BOTTOM -->
+  <div class="bottom-grid">
+    <div class="panel">
+      <div class="panel-header">// RECENT HISTORY</div>
+      <div id="history-list"><div style="color:var(--text-dim);font-size:0.75rem">No transactions yet</div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">// LEADERBOARD</div>
+      <div id="leaderboard-list"><div style="color:var(--text-dim);font-size:0.75rem">Loading...</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let minesActive = false, pokerDealt = false, selectedPokerCards = [];
+
+async function api(url, body=null){
+  const opts={method:body?'POST':'GET',headers:{'Content-Type':'application/json'}};
+  if(body) opts.body=JSON.stringify(body);
+  const res=await fetch(url,opts);
+  return res.json();
+}
+
+async function refreshUser(){
+  const d=await api('/api/user');
+  if(d.username){
+    document.getElementById('nav-user').textContent=d.username;
+    document.getElementById('nav-balance').textContent=Number(d.balance).toLocaleString()+' HEX';
+  }
+}
+
+async function refreshHistory(){
+  const d=await api('/api/history');
+  const el=document.getElementById('history-list');
+  if(!d.length){el.innerHTML='<div style="color:var(--text-dim);font-size:0.75rem">No transactions yet</div>';return;}
+  el.innerHTML=d.map(t=>{
+    const pos=t.result>0,zero=t.result===0;
+    const cls=pos?'h-win':zero?'h-push':'h-lose';
+    const sign=pos?'+':zero?'':'-';
+    return `<div class="history-item"><span class="h-game">${t.game}</span><span class="h-detail">${t.details||''}</span><span class="h-result ${cls}">${sign}${Math.abs(t.result).toFixed(0)}</span></div>`;
+  }).join('');
+}
+
+async function refreshLeaderboard(){
+  const d=await api('/api/leaderboard');
+  document.getElementById('leaderboard-list').innerHTML=d.map(u=>
+    `<div class="lb-item"><span class="lb-rank${u.rank<=3?' top':''}">#${u.rank}</span><span class="lb-name">${u.username}</span><span class="lb-bal">${Number(u.balance).toLocaleString()}</span></div>`
+  ).join('');
+}
+
+function openGame(game){
+  document.querySelectorAll('.game-panel').forEach(p=>p.classList.remove('visible'));
+  document.querySelectorAll('.game-card').forEach(c=>c.classList.remove('active-game'));
+  document.getElementById('panel-'+game).classList.add('visible');
+  event.currentTarget.classList.add('active-game');
+  document.getElementById('panel-'+game).scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function setResult(id, msg, type=''){
+  const el=document.getElementById(id);
+  el.textContent=msg;
+  el.className='result-box'+(type?' result-'+type:'');
+}
+
+// ── SLOTS ──
+async function spinSlots(){
+  const bet=parseFloat(document.getElementById('slots-bet').value);
+  const reels=[document.getElementById('r0'),document.getElementById('r1'),document.getElementById('r2')];
+  reels.forEach(r=>r.classList.add('spinning'));
+  const d=await api('/api/slots',{bet});
+  setTimeout(()=>{
+    reels.forEach((r,i)=>{r.classList.remove('spinning');r.textContent=d.reels[i];r.className='reel'+(d.outcome==='WIN'?' win':'');});
+    if(d.error){setResult('slots-result','> ERR: '+d.error);return;}
+    const sign=d.result>0?'+':'';
+    const type=d.outcome==='WIN'?'win':d.outcome==='PARTIAL'?'push':'lose';
+    setResult('slots-result',`${d.reels.join(' ')} | ${d.outcome}${d.multiplier?' — '+d.multiplier+'x multiplier':''}\n${sign}${d.result.toFixed(2)} HEX`,type);
+    refreshUser();refreshHistory();refreshLeaderboard();
+  },800);
+}
+
+// ── BLACKJACK ──
+function renderCard(c){
+  if(c.rank==='?') return '<div class="card face-down">?</div>';
+  const red=['♥','♦'].includes(c.suit);
+  return `<div class="card ${red?'red':'black'}">${c.rank}${c.suit}</div>`;
+}
+
+async function bjDeal(){
+  const bet=parseFloat(document.getElementById('bj-bet').value);
+  const d=await api('/api/blackjack/deal',{bet});
+  if(d.error){setResult('bj-result','> ERR: '+d.error);return;}
+  document.getElementById('dealer-cards').innerHTML=d.dealer.map(renderCard).join('');
+  document.getElementById('player-cards').innerHTML=d.player.map(renderCard).join('');
+  document.getElementById('dealer-value').textContent='Value: ?';
+  document.getElementById('player-value').textContent='Value: '+d.player_value;
+  document.getElementById('bj-actions').style.display='flex';
+  document.getElementById('bj-bet-row').style.opacity='0.5';
+  if(d.blackjack){setResult('bj-result','BLACKJACK! Standing automatically...','win');setTimeout(bjStand,800);}
+  else setResult('bj-result','// Hit or Stand?');
+}
+
+async function bjHit(){
+  const d=await api('/api/blackjack/hit',{});
+  if(d.error){setResult('bj-result','> ERR: '+d.error);return;}
+  document.getElementById('player-cards').innerHTML=d.player.map(renderCard).join('');
+  document.getElementById('player-value').textContent='Value: '+d.player_value;
+  if(d.bust){document.getElementById('bj-actions').style.display='none';document.getElementById('bj-bet-row').style.opacity='1';setResult('bj-result','BUST! You went over 21.','lose');refreshUser();refreshHistory();refreshLeaderboard();}
+}
+
+async function bjStand(){
+  const d=await api('/api/blackjack/stand',{});
+  if(d.error){setResult('bj-result','> ERR: '+d.error);return;}
+  document.getElementById('dealer-cards').innerHTML=d.dealer.map(renderCard).join('');
+  document.getElementById('dealer-value').textContent='Value: '+d.dealer_value;
+  document.getElementById('player-value').textContent='Value: '+d.player_value;
+  document.getElementById('bj-actions').style.display='none';
+  document.getElementById('bj-bet-row').style.opacity='1';
+  const sign=d.result>0?'+':'';
+  const type=d.outcome==='WIN'?'win':d.outcome==='PUSH'?'push':'lose';
+  setResult('bj-result',`${d.outcome} — Player: ${d.player_value} | Dealer: ${d.dealer_value}\n${sign}${d.result.toFixed(2)} HEX`,type);
+  refreshUser();refreshHistory();refreshLeaderboard();
+}
+
+// ── MINES ──
+function buildMinesGrid(){
+  const g=document.getElementById('mines-grid');
+  g.innerHTML='';
+  for(let i=0;i<25;i++){
+    const c=document.createElement('div');
+    c.className='mine-cell';c.dataset.idx=i;
+    c.innerHTML='<span>◆</span>';
+    c.onclick=()=>revealMine(i,c);
+    g.appendChild(c);
+  }
+}
+
+async function startMines(){
+  const bet=parseFloat(document.getElementById('mines-bet').value);
+  const mines=parseInt(document.getElementById('mines-count').value);
+  const d=await api('/api/mines/start',{bet,mines});
+  if(d.error){setResult('mines-result','> ERR: '+d.error);return;}
+  minesActive=true;
+  buildMinesGrid();
+  document.getElementById('mines-bet-row').style.opacity='0.5';
+  document.getElementById('mines-info').style.display='flex';
+  document.getElementById('mines-cashout-row').style.display='flex';
+  document.getElementById('mines-safe').textContent='0';
+  document.getElementById('mines-mult').textContent='1.00x';
+  document.getElementById('mines-potential').textContent='0';
+  setResult('mines-result','// Game started — reveal safe cells to multiply your bet');
+  refreshUser();
+}
+
+async function revealMine(idx,cell){
+  if(!minesActive||cell.classList.contains('safe')||cell.classList.contains('mine-hit')) return;
+  const d=await api('/api/mines/reveal',{cell:idx});
+  if(d.error){setResult('mines-result','> ERR: '+d.error);return;}
+  if(d.hit_mine){
+    cell.className='mine-cell mine-hit';cell.innerHTML='💣';
+    d.mines.forEach(m=>{
+      const mc=document.querySelector(`.mine-cell[data-idx="${m}"]`);
+      if(mc&&!mc.classList.contains('mine-hit')){mc.className='mine-cell mine-reveal';mc.innerHTML='💣';}
+    });
+    minesActive=false;
+    document.getElementById('mines-bet-row').style.opacity='1';
+    document.getElementById('mines-info').style.display='none';
+    document.getElementById('mines-cashout-row').style.display='none';
+    setResult('mines-result','BOOM! You hit a mine. All bets lost.','lose');
+    refreshUser();refreshHistory();refreshLeaderboard();
+  } else {
+    cell.className='mine-cell safe';cell.innerHTML='✓';
+    document.getElementById('mines-safe').textContent=d.safe_count;
+    document.getElementById('mines-mult').textContent=d.multiplier+'x';
+    document.getElementById('mines-potential').textContent=d.potential_win.toFixed(2);
+    setResult('mines-result',`Safe! ${d.safe_count} cells revealed. Multiplier: ${d.multiplier}x — Cashout for ${d.potential_win.toFixed(2)} HEX or keep going...`,'win');
+  }
+}
+
+async function minesCashout(){
+  if(!minesActive) return;
+  const d=await api('/api/mines/cashout',{});
+  if(d.error){setResult('mines-result','> ERR: '+d.error);return;}
+  minesActive=false;
+  document.getElementById('mines-bet-row').style.opacity='1';
+  document.getElementById('mines-info').style.display='none';
+  document.getElementById('mines-cashout-row').style.display='none';
+  document.querySelectorAll('.mine-cell').forEach(c=>c.onclick=null);
+  setResult('mines-result',`CASHOUT! x${d.multiplier} multiplier — Won ${d.winnings.toFixed(2)} HEX (+${d.result.toFixed(2)})`, 'win');
+  refreshUser();refreshHistory();refreshLeaderboard();
+}
+
+// ── POKER ──
+function isRed(suit){return ['♥','♦'].includes(suit);}
+
+function renderPokerHand(hand){
+  const el=document.getElementById('poker-hand');
+  el.innerHTML=hand.map((c,i)=>
+    `<div class="poker-card${selectedPokerCards.includes(i)?' selected':''}" onclick="togglePokerCard(${i})">
+      <div class="${isRed(c.suit)?'suit-red':'suit-black'}">${c.rank}${c.suit}</div>
+    </div>`
+  ).join('');
+}
+
+function togglePokerCard(i){
+  if(!pokerDealt) return;
+  const idx=selectedPokerCards.indexOf(i);
+  if(idx>-1) selectedPokerCards.splice(idx,1);
+  else selectedPokerCards.push(i);
+  const hand=JSON.parse(document.getElementById('poker-hand').dataset.hand||'[]');
+  renderPokerHand(hand);
+}
+
+async function pokerDeal(){
+  const bet=parseFloat(document.getElementById('poker-bet').value);
+  const d=await api('/api/poker/deal',{bet});
+  if(d.error){setResult('poker-result','> ERR: '+d.error);return;}
+  pokerDealt=true;selectedPokerCards=[];
+  const el=document.getElementById('poker-hand');
+  el.dataset.hand=JSON.stringify(d.hand);
+  renderPokerHand(d.hand);
+  document.getElementById('poker-hand-name').textContent=d.hand_value;
+  document.getElementById('poker-draw-row').style.display='block';
+  document.getElementById('poker-deal-btn').style.opacity='0.5';
+  document.getElementById('poker-hint').textContent='Click cards to discard, then hit Draw';
+  setResult('poker-result','// Select cards to discard and draw new ones');
+}
+
+async function pokerDraw(){
+  const d=await api('/api/poker/draw',{discard:selectedPokerCards});
+  if(d.error){setResult('poker-result','> ERR: '+d.error);return;}
+  pokerDealt=false;selectedPokerCards=[];
+  const el=document.getElementById('poker-hand');
+  el.dataset.hand=JSON.stringify(d.hand);
+  renderPokerHand(d.hand);
+  document.getElementById('poker-hand-name').textContent=d.hand_name;
+  document.getElementById('poker-draw-row').style.display='none';
+  document.getElementById('poker-deal-btn').style.opacity='1';
+  document.getElementById('poker-hint').textContent='Click cards to select them for discard, then draw';
+  const sign=d.result>0?'+':'';
+  const type=d.result>0?'win':d.result===0?'push':'lose';
+  setResult('poker-result',`${d.hand_name} — x${d.multiplier} | ${sign}${d.result.toFixed(2)} HEX`,type);
+  refreshUser();refreshHistory();refreshLeaderboard();
+}
+
+// INIT
+refreshUser();refreshHistory();refreshLeaderboard();
+setInterval(refreshLeaderboard,30000);
+</script>
+</body>
+</html>

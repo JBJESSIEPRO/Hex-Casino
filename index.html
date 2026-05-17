@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HEX CASINO</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#020810;--bg2:#050f1a;--neon:#00ff88;--neon2:#00ccff;--neon3:#ff0066;--text:#c8e8ff;--text-dim:#4a7a9b;--card:#071220;--border:#0d2a3d;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Share Tech Mono',monospace;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(0,255,136,0.04) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(0,204,255,0.04) 0%,transparent 60%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);pointer-events:none;z-index:1;}
+.container{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;}
+.logo-wrap{text-align:center;margin-bottom:3rem;}
+.logo{font-family:'Orbitron',sans-serif;font-size:clamp(2.5rem,8vw,5rem);font-weight:900;background:linear-gradient(135deg,var(--neon),var(--neon2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 30px rgba(0,255,136,0.5));letter-spacing:0.15em;animation:flicker 4s infinite;}
+@keyframes flicker{0%,96%,100%{opacity:1;}97%{opacity:0.8;}98%{opacity:1;}99%{opacity:0.7;}}
+.logo-sub{font-size:0.75rem;letter-spacing:0.4em;color:var(--text-dim);margin-top:0.5rem;}
+.logo-line{width:200px;height:1px;background:linear-gradient(90deg,transparent,var(--neon),transparent);margin:1rem auto;}
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:2.5rem;width:100%;max-width:420px;box-shadow:0 0 40px rgba(0,255,136,0.05);position:relative;overflow:hidden;}
+.auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--neon),var(--neon2),transparent);}
+.tabs{display:flex;margin-bottom:2rem;border-bottom:1px solid var(--border);}
+.tab{flex:1;padding:0.75rem;text-align:center;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:0.72rem;letter-spacing:0.1em;color:var(--text-dim);transition:all 0.3s;border-bottom:2px solid transparent;}
+.tab.active{color:var(--neon);border-bottom-color:var(--neon);}
+.form-group{margin-bottom:1.25rem;}
+.form-group label{display:block;font-size:0.7rem;letter-spacing:0.15em;color:var(--text-dim);margin-bottom:0.5rem;text-transform:uppercase;}
+.form-group input{width:100%;background:rgba(0,255,136,0.03);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:0.95rem;padding:0.75rem 1rem;border-radius:2px;outline:none;transition:all 0.3s;}
+.form-group input:focus{border-color:var(--neon);box-shadow:0 0 15px rgba(0,255,136,0.1);}
+.btn{width:100%;padding:0.9rem;font-family:'Orbitron',sans-serif;font-size:0.8rem;letter-spacing:0.15em;font-weight:700;border:none;cursor:pointer;border-radius:2px;transition:all 0.3s;text-transform:uppercase;}
+.btn-primary{background:linear-gradient(135deg,var(--neon),var(--neon2));color:#000;box-shadow:0 0 20px rgba(0,255,136,0.3);}
+.btn-primary:hover{box-shadow:0 0 40px rgba(0,255,136,0.5);transform:translateY(-1px);}
+.error-msg{color:var(--neon3);font-size:0.75rem;margin-top:0.75rem;text-align:center;min-height:1rem;}
+.corner{position:absolute;width:12px;height:12px;}
+.corner-tl{top:8px;left:8px;border-top:1px solid var(--neon);border-left:1px solid var(--neon);}
+.corner-tr{top:8px;right:8px;border-top:1px solid var(--neon);border-right:1px solid var(--neon);}
+.corner-bl{bottom:8px;left:8px;border-bottom:1px solid var(--neon);border-left:1px solid var(--neon);}
+.corner-br{bottom:8px;right:8px;border-bottom:1px solid var(--neon);border-right:1px solid var(--neon);}
+.stats-bar{display:flex;gap:2rem;margin-top:2rem;font-size:0.7rem;color:var(--text-dim);flex-wrap:wrap;justify-content:center;}
+.stat span{color:var(--neon);}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="logo-wrap">
+    <div class="logo">HEX CASINO</div>
+    <div class="logo-sub">// ENTER THE GRID //</div>
+    <div class="logo-line"></div>
+  </div>
+  <div class="auth-card">
+    <div class="corner corner-tl"></div><div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div><div class="corner corner-br"></div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('login')">[ LOGIN ]</div>
+      <div class="tab" onclick="switchTab('register')">[ REGISTER ]</div>
+    </div>
+    <div id="login-form">
+      <div class="form-group"><label>Username</label><input type="text" id="login-user" placeholder="enter username"/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="enter password"/></div>
+      <button class="btn btn-primary" onclick="doLogin()">ACCESS SYSTEM</button>
+    </div>
+    <div id="register-form" style="display:none">
+      <div class="form-group"><label>Username</label><input type="text" id="reg-user" placeholder="choose username"/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="reg-pass" placeholder="min 6 characters"/></div>
+      <button class="btn btn-primary" onclick="doRegister()">CREATE ACCOUNT</button>
+    </div>
+    <div class="error-msg" id="auth-error"></div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat">STARTING BALANCE: <span>1,000 HEX</span></div>
+    <div class="stat">GAMES: <span>SLOTS | BLACKJACK | MINES | POKER</span></div>
+  </div>
+</div>
+<script>
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',(tab==='login'&&i===0)||(tab==='register'&&i===1)));
+  document.getElementById('login-form').style.display=tab==='login'?'block':'none';
+  document.getElementById('register-form').style.display=tab==='register'?'block':'none';
+  document.getElementById('auth-error').textContent='';
+}
+async function doLogin(){
+  const username=document.getElementById('login-user').value;
+  const password=document.getElementById('login-pass').value;
+  const res=await fetch('/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
+  const data=await res.json();
+  if(data.error){document.getElementById('auth-error').textContent='> ERR: '+data.error;}
+  else window.location.href='/dashboard';
+}
+async function doRegister(){
+  const username=document.getElementById('reg-user').value;
+  const password=document.getElementById('reg-pass').value;
+  const res=await fetch('/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
+  const data=await res.json();
+  if(data.error){document.getElementById('auth-error').textContent='> ERR: '+data.error;}
+  else window.location.href='/dashboard';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){const tab=document.querySelector('.tab.active').textContent;tab.includes('LOGIN')?doLogin():doRegister();}});
+</script>
+</body>
+</html>
