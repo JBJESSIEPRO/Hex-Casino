@@ -392,7 +392,8 @@ def poker_draw():
     return jsonify({'hand': hand, 'hand_name': hand_name, 'multiplier': multiplier,
                     'result': round(result, 2), 'balance': round(user.balance, 2)})
 
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
